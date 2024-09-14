@@ -3,6 +3,6 @@
 
 import { signIn } from "@/auth"
 
-    export async function GoogleButton() {
-        return await signIn('google')
-      }
+export async function GoogleButton() {
+   return await signIn('google')
+  }

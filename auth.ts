@@ -23,6 +23,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
+    async signIn({ user }) {
+      if (!user.name && user.email) {
+        // Use the part before "@" as the default name
+        const emailArray = user.email.split("@");
+        user.name = emailArray[0];
+      }
+      return true;
+    },
     async session({session, token, user}){
       return session;
     },
