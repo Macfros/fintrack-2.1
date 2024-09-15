@@ -1,10 +1,11 @@
-
+"use client"
 
 export interface BillModel {
     name: string;
     category: string;
     amount: number;
-    date: Date;
+    secure_url?: string;
+    createdAt: Date; 
     subItems: SubItemModel[];
 }
 
@@ -13,6 +14,7 @@ export interface SubItemModel {
     name: string;
     amount: number;
 }
+
 
 export interface TableItem {
         id :        String;

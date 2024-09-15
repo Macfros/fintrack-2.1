@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/database';
-import getUser from '../../auth/[...nextauth]/Hooks/getUser';
+import {getUser} from '../../auth/[...nextauth]/Hooks/getUser';
 
 export async function GetAllBills() {
   try {
@@ -27,7 +27,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "No bills found" }, { status: 404 });
     }
 
-    return NextResponse.json(bills); // Return the bills if found
+    return NextResponse.json(bills); 
+    // Return the bills if found
   } catch (error) {
     console.error("Error in API handler:", error);
     return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });

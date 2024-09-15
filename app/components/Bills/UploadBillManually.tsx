@@ -4,8 +4,10 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure
 import {Dropdown, DropdownTrigger, DropdownMenu, DropdownItem} from "@nextui-org/react";
 import { useState, ChangeEvent } from "react";
 import { BillModel, SubItemModel } from "@/app/Models/Models";
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import { categories } from "@/app/Constants/constants";
+import { useAppDispatch,useAppSelector } from "@/app/store/hooks";
+import { addBill } from "@/app/store/slices/bill";
 
 
 interface SubItemProps {
@@ -60,12 +62,13 @@ const SubItem: React.FC<SubItemProps> = ({ index, subItem, onDelete, onChange })
 };
 
 const UploadBillManually: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
+    const dispatch = useAppDispatch();
     const [subitems, setSubitems] = useState<SubItemModel[]>([{ id: 0, name: "", amount: 0 }]);
     const [bill, setBill] = useState<BillModel>({
         name: "",  
         category: "",         
         amount: 0,         
-        date: new Date(),   
+        createdAt: new Date(),   
         subItems: []        
     });
 
@@ -98,7 +101,7 @@ const UploadBillManually: React.FC<{ isOpen: boolean; onClose: () => void }> = (
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault(); // Prevent the default form submission behavior
         
-        const formData = new FormData(); // Create a new FormData object
+        const formData = new FormData(); //Create a new FormData object
         formData.append('name', bill.name); // Append the bill title
         formData.append('category', bill.category); // Append the bill title
         formData.append('amount', bill.amount.toString()); // Ensure amount is a string
@@ -122,6 +125,7 @@ const UploadBillManually: React.FC<{ isOpen: boolean; onClose: () => void }> = (
             const result = await response.json(); // Parse the JSON response
             console.log('Response:', result);
             toast.success("Bill Uploaded!");
+            dispatch(addBill(result));
              // Log the response for debugging
         } catch (error) {
             console.error('Error submitting form:', error); // Handle errors
@@ -133,7 +137,7 @@ const UploadBillManually: React.FC<{ isOpen: boolean; onClose: () => void }> = (
             name: "",
             category: "",
             amount: 0,
-            date: new Date(),
+            createdAt: new Date(),
             subItems: []
         });
 

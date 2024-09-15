@@ -1,5 +1,5 @@
-import {Button} from "@nextui-org/button";
-import getUser from "./api/auth/[...nextauth]/Hooks/getUser"
+
+import {getUser} from "./api/auth/[...nextauth]/Hooks/getUser"
 import NavbarMain from "./components/Navbar/NavbarMain";
 import Dashboard from "./components/Dashboard/Dashboard";
 import { Toaster } from "react-hot-toast";

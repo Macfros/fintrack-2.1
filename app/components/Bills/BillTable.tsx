@@ -1,44 +1,37 @@
-import React, { useEffect, useState } from "react";
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Spinner, Button } from "@nextui-org/react";
-import { TableItem } from "@/app/Models/Models";
+"use client";
+
+import React, { useEffect } from "react";
+import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from "@nextui-org/react";
+import { BillModel } from "@/app/Models/Models";
+import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
+import { setBills } from "@/app/store/slices/bill";
 
 const BillTable: React.FC = () => {
-  const [bills, setBills] = useState<TableItem[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const dispatch = useAppDispatch();
+  const billList = useAppSelector((state) => state.bills.billList);
 
   useEffect(() => {
-    fetchBills();
-  }, []);
+    const fetchBills = async () => {
+      try {
+        const response = await fetch('/api/BillActions/GetAllBills', {
+          method: 'POST',
+        });
 
-  const fetchBills = async () => {
-    try {
-      const response = await fetch('/api/BillActions/GetAllBills', {
-        method: 'POST'
-      });
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
 
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
+        const data: BillModel[] = await response.json();
+        console.log(data);
+        dispatch(setBills(data));
+      } catch (e) {
+        console.error('Error fetching bills:', e);
       }
+    };
 
-      const data: TableItem[] = await response.json();
-      setBills(data);
-
-    } catch (e: any) {
-      console.error(e);
-      setError('Error fetching bills');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) return (
-    <div className="flex items-center justify-center h-screen">
-      <Spinner />
-    </div>
-  );
-  
-  if (error) return <div>{error}</div>;
+    fetchBills();
+    
+  }, [dispatch]);
 
   return (
     <Table
@@ -57,9 +50,9 @@ const BillTable: React.FC = () => {
         <TableColumn key="createdAt" className="bg-black text-white">Date</TableColumn>
         <TableColumn key="actions" className="bg-black text-white">Actions</TableColumn>
       </TableHeader>
-      <TableBody items={bills}>
-        {bills.map((item: TableItem, index: number) => (
-          <TableRow key={item.id}>
+      <TableBody items={billList}>
+        {billList.map((item: BillModel, index: number) => (
+          <TableRow key={index}>
             <TableCell>{index + 1}</TableCell>
             <TableCell>{item.name}</TableCell>
             <TableCell>{item.category}</TableCell>

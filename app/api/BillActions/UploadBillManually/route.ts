@@ -1,7 +1,7 @@
 // app/api/uploadBill/route.ts
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/database'; // Adjust the import path for your Prisma client
-import getUser from '../../auth/[...nextauth]/Hooks/getUser';
+import {getUser} from '../../auth/[...nextauth]/Hooks/getUser';
 // Adjust the import path for your user retrieval function
 
 // Define the uploadBillManually function
@@ -20,7 +20,7 @@ const uploadBillManually = async (formData: FormData) => {
         }
 
         // Create the photo record
-        const photo = await prisma.photo.create({
+        const newBill = await prisma.photo.create({
             data: {
                 name: name,
                 category: category,
@@ -38,7 +38,7 @@ const uploadBillManually = async (formData: FormData) => {
             },
         });
 
-        return { message: "Done", status: 200 };
+        return newBill;
 
     } catch (error) {
         console.error("Error saving data:", error);
@@ -51,7 +51,10 @@ export async function POST(request: Request) {
     try {
         const formData = await request.formData(); // Get form data from the request
         const result = await uploadBillManually(formData); // Call the function
-        return NextResponse.json(result, { status: result.status });
+        if(result == null)
+            return NextResponse.json("Error uploading bill from API",{status: 500});
+
+        return NextResponse.json(result, { status: 200 });
     } catch (error) {
         console.error("Error in API handler:", error);
         return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });

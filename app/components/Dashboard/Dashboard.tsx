@@ -8,7 +8,7 @@ import Homepage from "@/app/components/HomePage/Homepage"
 import Bills from '../Bills/Bills';
 
 interface AppProps{
-  user: User
+  user: User | null
 }
 
 const sidebarItems = [

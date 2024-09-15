@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
+import type { NextApiRequest, NextApiResponse } from 'next';
 
-const getUser = async() => {
+export const getUser = async() => {
     const session = await auth();
         
     if(!session?.user) return null;
@@ -14,4 +15,13 @@ const getUser = async() => {
     return user; 
 }
 
-export default getUser;
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+    try {
+      const user = await getUser();
+      res.status(200).json(user);
+    } catch (error) {
+      res.status(500).json({ error: 'Error fetching user' });
+    }
+  }
+
+
