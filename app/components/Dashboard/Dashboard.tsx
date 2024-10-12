@@ -1,14 +1,22 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FiHome, FiUser, FiSettings } from 'react-icons/fi';
 import Sidebar, { SidebarItem } from '../Sidebar/Sidebar';
 import { User } from 'next-auth';
 import Homepage from "@/app/components/HomePage/Homepage"
 import Bills from '../Bills/Bills';
+import { useAppDispatch } from '@/app/store/hooks';
+import { BillModel } from '@/app/Models/Models';
+import { setBills } from '@/app/store/slices/bill';
+
 
 interface AppProps{
-  user: User | null
+  user?: {
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+  } | null;
 }
 
 const sidebarItems = [
@@ -28,11 +36,40 @@ const sidebarItems = [
 
 const Dashboard: React.FC<AppProps> = ({user}) => {
   const [activePage, setActivePage] = useState<string>("Home");
+  const dispatch = useAppDispatch();
 
   const handleSetActivePage = (page: string) => {
     console.log(page);
     setActivePage(page);
   };
+
+  useEffect(() => {
+    const fetchBills = async () => {
+      try {
+        const response = await fetch('/api/BillActions/GetAllBills', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ user }), // Send the user object as JSON
+        });
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+
+        const data: BillModel[] = await response.json();
+        //console.log(data);
+        dispatch(setBills(data));
+        
+      } catch (e) {
+        console.error('Error fetching bills:', e);
+      }
+    };
+
+    fetchBills();
+    
+  }, [dispatch]);
 
   return (
     <div className="flex">
@@ -46,7 +83,6 @@ const Dashboard: React.FC<AppProps> = ({user}) => {
               active={activePage === `${item.page}`}
               onClick={() => handleSetActivePage(`${item.page}`)}
           />
-
         ))}
         
       </Sidebar>

@@ -1,4 +1,5 @@
 // EmailInput.tsx
+"use client";
 import React from "react";
 import { Input } from "@nextui-org/react";
 

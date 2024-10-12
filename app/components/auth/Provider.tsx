@@ -1,3 +1,5 @@
+"use client";
+
 import { SessionProvider } from "next-auth/react";
 import { ReactNode } from "react";
 import { NextUIProvider } from "@nextui-org/react";
@@ -11,10 +13,10 @@ interface ProviderProps {
 export default function Provider({ children }: ProviderProps) {
   return (
     <SessionProvider>
-      <NextUIProvider>  
+      <NextUIProvider>
         <ReduxWrapper>
           {children}
-          </ReduxWrapper> 
+        </ReduxWrapper>
       </NextUIProvider>
     </SessionProvider>
   );

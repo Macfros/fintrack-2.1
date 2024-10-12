@@ -8,8 +8,13 @@ import AvatarComponent from "../auth/AvatarComponent";
 import Image from 'next/image'
 import { IoMdLogIn } from "react-icons/io";
 
-interface NavbarProps{
-  user?: User | null;
+
+interface NavbarProps {
+  user?: {
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+  } | null; // Or directly use `User | null` if you're using next-auth User type
 }
 
 const NavbarMain: React.FC<NavbarProps> = ({user = null}) =>{

@@ -78,7 +78,7 @@ model photo {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   user        User     @relation(fields: [authorId], references: [id])
-  subitems    subitem[]
+  subitems    subitem[] 
 }
 
 model subitem {
@@ -86,7 +86,7 @@ model subitem {
   name     String
   amount   Float
   photoId  String  @db.ObjectId
-  photo    photo   @relation(fields: [photoId], references: [id])
+  photo    photo   @relation(fields: [photoId], references: [id], onDelete: Cascade)
 }
 
 

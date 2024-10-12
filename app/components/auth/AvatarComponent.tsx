@@ -1,3 +1,5 @@
+"use client";
+
 import {Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Avatar, User} from "@nextui-org/react";
 import SignOutButtonProps from "./SignOutButton";
 

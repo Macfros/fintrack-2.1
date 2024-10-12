@@ -1,11 +1,10 @@
-// app/api/uploadBill/route.ts
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/database'; // Adjust the import path for your Prisma client
-import {getUser} from '../../auth/[...nextauth]/Hooks/getUser';
-// Adjust the import path for your user retrieval function
+import { getToken } from 'next-auth/jwt'; // Use getToken for getting session in app directory
+import { NextApiRequest } from 'next';
 
 // Define the uploadBillManually function
-const uploadBillManually = async (formData: FormData) => {
+const uploadBillManually = async (formData: FormData, token: any) => {
     try {
         const name = formData.get('name') as string;
         const category = formData.get('category') as string;
@@ -13,10 +12,19 @@ const uploadBillManually = async (formData: FormData) => {
         const priceInt = parseFloat(price);
         const subItemsArray = JSON.parse(formData.get('subItems') as string);
 
-        const user = await getUser();
-
-        if (!user || !user.id) {
+        if (!token || !token.email) {
             throw new Error('User not authenticated');
+        }
+
+        // Fetch the user from the database using their email
+        const user = await prisma.user.findUnique({
+            where: {
+                email: token.email,
+            },
+        });
+
+        if (!user) {
+            throw new Error('User not found');
         }
 
         // Create the photo record
@@ -36,6 +44,9 @@ const uploadBillManually = async (formData: FormData) => {
                     })),
                 },
             },
+            include: {
+                subitems: true,  // Ensure that subitems are included in the result
+            },
         });
 
         return newBill;
@@ -47,12 +58,23 @@ const uploadBillManually = async (formData: FormData) => {
 };
 
 // Handle the POST request
-export async function POST(request: Request) {
+export async function POST(request: any) {
     try {
         const formData = await request.formData(); // Get form data from the request
-        const result = await uploadBillManually(formData); // Call the function
-        if(result == null)
-            return NextResponse.json("Error uploading bill from API",{status: 500});
+
+        // Use getToken to retrieve the user's session token from the request
+        const token = await getToken({ req: request });
+
+        if (!token) {
+            return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+        }
+
+        // Pass the token to the uploadBillManually function
+        const result = await uploadBillManually(formData, token);
+        
+        if (result == null) {
+            return NextResponse.json({ message: "Error uploading bill" }, { status: 500 });
+        }
 
         return NextResponse.json(result, { status: 200 });
     } catch (error) {

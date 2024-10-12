@@ -1,9 +1,17 @@
+"use client";
+
 import { User } from "next-auth";
 import InfoCard from "@/app/components/HomePage/InfoCard";
 import { IndianRupee } from "lucide-react";
+import { useAppSelector } from "@/app/store/hooks";
+import { MiscellaneousSpent, mostSpentCategory, selectCurrentMonthAmount, selectTotalAmount } from "@/app/store/slices/bill";
 
 interface AppProps {
-  user: User;
+  user?: {
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+  } | null;
 }
 
 const Homepage: React.FC<AppProps> = ({ user }) => {
@@ -17,13 +25,16 @@ const Homepage: React.FC<AppProps> = ({ user }) => {
     year: 'numeric', // "2024"
   });
 
-  const totalAmount = 500; // TODO: Fetch from DB
+
+  const totalAmount =  useAppSelector(selectTotalAmount); // TODO: Fetch from DB
+  const currentMonthAmount  = useAppSelector(selectCurrentMonthAmount);
+  const maxSpentCategory = useAppSelector(mostSpentCategory);
+  const miscellaneousSpent = useAppSelector(MiscellaneousSpent);
   const comparisonSubtext = "50% more from last month"; // TODO: Fetch from DB
-  const categoryName = "Food"; // TODO: Fetch from DB
 
   return (
     <>
-      <div>Hello {user.name}!</div>
+      <div>Hello {user?.name}!</div>
 
       <div className="flex flex-wrap gap-5">
         <InfoCard
@@ -38,24 +49,24 @@ const Homepage: React.FC<AppProps> = ({ user }) => {
           title="Monthly Spending"
           icon={IndianRupee}
           date={monthName}
-          amount={totalAmount}
-          subtext={comparisonSubtext}
+          amount={currentMonthAmount.amount}
+          subtext={currentMonthAmount.comparison}
         />
 
         <InfoCard
           title="Most Spend"
           icon={IndianRupee}
           date={formattedDate}
-          amount={totalAmount}
-          subtext={categoryName}
+          amount={maxSpentCategory.total}
+          subtext={maxSpentCategory.category}
         />
 
         <InfoCard
           title="Miscellaneous"
           icon={IndianRupee}
           date={formattedDate}
-          amount={totalAmount}
-          subtext={comparisonSubtext}
+          amount={miscellaneousSpent.amount}
+          subtext={miscellaneousSpent.comparison}
         />
       </div>
     </>

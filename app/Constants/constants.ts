@@ -7,3 +7,4 @@ export const categories:string[] = [
     "Recreation",
     "Miscellaneous"
 ];
+

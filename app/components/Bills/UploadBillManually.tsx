@@ -65,6 +65,7 @@ const UploadBillManually: React.FC<{ isOpen: boolean; onClose: () => void }> = (
     const dispatch = useAppDispatch();
     const [subitems, setSubitems] = useState<SubItemModel[]>([{ id: 0, name: "", amount: 0 }]);
     const [bill, setBill] = useState<BillModel>({
+        id: "",
         name: "",  
         category: "",         
         amount: 0,         
@@ -123,17 +124,27 @@ const UploadBillManually: React.FC<{ isOpen: boolean; onClose: () => void }> = (
             }
     
             const result = await response.json(); // Parse the JSON response
+
+            const mappedResult = {
+                ...result,
+                subItems: result.subitems || [], // Map 'subitems' to 'subItems'
+            };
+
             console.log('Response:', result);
             toast.success("Bill Uploaded!");
-            dispatch(addBill(result));
+            dispatch(addBill(mappedResult));
+            
              // Log the response for debugging
         } catch (error) {
+
             console.error('Error submitting form:', error); // Handle errors
             toast.error("Oops! something went wrong");
+
         }
 
         setSubitems([{ id: 0, name: "", amount: 0 }]);
         setBill({
+            id: "",
             name: "",
             category: "",
             amount: 0,
