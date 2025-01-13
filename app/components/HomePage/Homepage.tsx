@@ -33,10 +33,10 @@ const Homepage: React.FC<AppProps> = ({ user }) => {
   const comparisonSubtext = "50% more from last month"; // TODO: Fetch from DB
 
   return (
-    <>
+    <div className="w-full p-5">
       <div>Hello {user?.name}!</div>
 
-      <div className="flex flex-wrap gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 w-full">
         <InfoCard
           title="Total Spending"
           icon={IndianRupee}
@@ -69,7 +69,7 @@ const Homepage: React.FC<AppProps> = ({ user }) => {
           subtext={miscellaneousSpent.comparison}
         />
       </div>
-    </>
+    </div>
   );
 };
 

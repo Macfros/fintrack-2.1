@@ -3,10 +3,11 @@ import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Button
 import { BillModel } from "@/app/Models/Models";
 import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
 import { deleteBill } from "@/app/store/slices/bill";
-import { List, Trash } from "lucide-react";
+import { Download, Eye, List, Trash } from "lucide-react";
 import toast from "react-hot-toast";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import BillDescriptionViewer from "./BillDescriptionViewer";
+import ViewPhotoModal from "./ViewPhotoModal";
 
 const BillTable: React.FC = () => {
   const billList = useAppSelector((state) => state.bills.billList);
@@ -14,6 +15,8 @@ const BillTable: React.FC = () => {
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isImageIvewModalOpen, setImageViewModalOpen] = useState(false);
+  const [url,setUrl] = useState<String | null | undefined>(null);
   const [selectedBill, setSelectedBill] = useState<BillModel | null>(null);
 
   const handleDeleteClick = (item: BillModel) => {
@@ -25,6 +28,45 @@ const BillTable: React.FC = () => {
     setSelectedBill(item);
     setIsViewModalOpen(true);
   }
+
+  const handleImageViewer = (bill: BillModel) => {
+    setSelectedBill(bill);
+    setImageViewModalOpen(true);
+  }
+
+  const DownloadButton = async (bill: BillModel | null) => {
+    if (bill == null) return;
+
+    const secureUrl = bill.secure_url; // Assuming `secureurl` is the property containing the image URL
+    if (!secureUrl) return;
+  
+    try {
+      // Fetch the image as a Blob
+      const response = await fetch(secureUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch image: ${response.statusText}`);
+      }
+  
+      const blob = await response.blob();
+  
+      // Create a download link
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'image.jpg'; // You can customize the filename here
+  
+      // Trigger the download
+      document.body.appendChild(link);
+      link.click();
+  
+      // Clean up the link element and revoke the object URL
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+
+    } catch (error) {
+      console.error('Error downloading the image:', error);
+    }
+  } 
+
 
   const confirmDelete = async () => {
     if (selectedBill) {
@@ -58,9 +100,11 @@ const BillTable: React.FC = () => {
       <Table
         isHeaderSticky
         aria-label="Example table with client side sorting"
+        isStriped
         classNames={{
-          base: "max-h-[520px] overflow-scroll",
-          table: "min-h-[420px]",
+          base: "max-h-[500px] overflow-scroll mt-5",
+          table: "min-h-[400px]",
+          wrapper: "p-0"
         }}
       >
         <TableHeader className="">
@@ -73,22 +117,23 @@ const BillTable: React.FC = () => {
         </TableHeader>
         <TableBody items={billList}>
           {billList.map((item: BillModel, index: number) => (
-            <TableRow key={index}>
-              <TableCell>{index + 1}</TableCell>
-              <TableCell>{item.name}</TableCell>
-              <TableCell>{item.category}</TableCell>
-              <TableCell>{item.amount}</TableCell>
-              <TableCell>{new Date(item.createdAt).toLocaleDateString('en-GB')}</TableCell>
-              <TableCell className="flex gap-2">
+            <TableRow key={index} className="align-middle">
+              <TableCell className="align-middle">{index + 1}</TableCell>
+              <TableCell className="align-middle">{item.name}</TableCell>
+              <TableCell className="align-middle">{item.category}</TableCell>
+              <TableCell className="align-middle">{item.amount}</TableCell>
+              <TableCell className="align-middle">{new Date(item.createdAt).toLocaleDateString('en-GB')}</TableCell>
+              <TableCell className="align-middle">
+                <div className="flex gap-2">
                 <Button
-                onClick={()=> handleViewer(item)}
-                isIconOnly
-                color="success"
-                variant="ghost"
-                aria-label="View Bill"
+                  onClick={() => handleViewer(item)}
+                  isIconOnly
+                  color="success"
+                  variant="ghost"
+                  aria-label="View Bill"
                 >
                   <List />
-                  </Button>
+                </Button>
                 <Button
                   onClick={() => handleDeleteClick(item)}
                   isIconOnly
@@ -98,18 +143,28 @@ const BillTable: React.FC = () => {
                 >
                   <Trash />
                 </Button>
+                <Button
+                  onClick={() => handleImageViewer(item)}
+                  isIconOnly
+                  color="success"
+                  variant="ghost"
+                  aria-label="View Bill"
+                >
+                  <Eye />
+                </Button>
+                </div>
               </TableCell>
-            </TableRow>
+            </TableRow>          
           ))}
         </TableBody>
       </Table>
       
       <BillDescriptionViewer
           isOpen={isViewModalOpen}
-          onClose={()=> setIsViewModalOpen(false)}
-          itemName = {selectedBill}
-          totalAmount={selectedBill?.amount || 0}
-          />
+          onClose={() => setIsViewModalOpen(false)}
+          itemName={selectedBill}
+        />
+
       {/* Reusable Confirmation Modal */}
       <DeleteConfirmationModal
         isOpen={isDeleteModalOpen}
@@ -117,6 +172,14 @@ const BillTable: React.FC = () => {
         onConfirm={confirmDelete}
         itemName={selectedBill?.name || "this bill"}
       />
+
+      <ViewPhotoModal
+         isOpen={isImageIvewModalOpen}
+         onClose={() => setImageViewModalOpen(false)}
+         onConfirm={()=> DownloadButton(selectedBill)}
+         itemName={selectedBill!}
+      />
+
     </>
   );
 };

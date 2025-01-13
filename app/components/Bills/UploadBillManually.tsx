@@ -9,7 +9,6 @@ import { categories } from "@/app/Constants/constants";
 import { useAppDispatch,useAppSelector } from "@/app/store/hooks";
 import { addBill } from "@/app/store/slices/bill";
 
-
 interface SubItemProps {
     index: number;
     subItem: SubItemModel;
@@ -69,8 +68,9 @@ const UploadBillManually: React.FC<{ isOpen: boolean; onClose: () => void }> = (
         name: "",  
         category: "",         
         amount: 0,         
-        createdAt: new Date(),   
-        subItems: []        
+        createdAt: "",   
+        subItems: [],
+        billImage: undefined         
     });
 
     const handleSubItemChange = (index: number, updatedSubItem: SubItemModel) => {
@@ -87,6 +87,12 @@ const UploadBillManually: React.FC<{ isOpen: boolean; onClose: () => void }> = (
     const updateTotalAmount = (items: SubItemModel[]) => {
         const total = items.reduce((sum, item) => sum + item.amount, 0);
         setBill(prev => ({ ...prev, amount: total }));
+    };
+
+    const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setBill((prev) => ({ ...prev, billImage: e.target.files![0] })); // Set the selected file in the bill model
+        }
     };
 
     const addSubItem = () => {
@@ -108,10 +114,13 @@ const UploadBillManually: React.FC<{ isOpen: boolean; onClose: () => void }> = (
         formData.append('amount', bill.amount.toString()); // Ensure amount is a string
         formData.append('date', new Date().toISOString()); // Use ISO format for date
         formData.append('subItems', JSON.stringify(subitems)); // Append subitems as a JSON string
+        if (bill.billImage) {
+            formData.append('billImage', bill.billImage); // Attach the image if provided
+        }
         // formData.forEach((value, key) => {
         //     console.log(`${key}: ${value}`);
         // });
-
+    
 
         try {
             const response = await fetch('/api/BillActions/UploadBillManually', {
@@ -148,8 +157,9 @@ const UploadBillManually: React.FC<{ isOpen: boolean; onClose: () => void }> = (
             name: "",
             category: "",
             amount: 0,
-            createdAt: new Date(),
-            subItems: []
+            createdAt: "",
+            subItems: [],
+            billImage: undefined
         });
 
         onClose();
@@ -167,7 +177,7 @@ const UploadBillManually: React.FC<{ isOpen: boolean; onClose: () => void }> = (
                                 <p>
                                     Enter the details of your bill. You can also enter the subitems.
                                 </p>
-                                <Input type="text" variant="underlined" name="name" label="Bill Title" value={bill.name} onChange={handleBillChange}/>
+                                <Input type="text" variant="underlined" name="name" label="Bill Title" value={bill.name} onChange={handleBillChange} isRequired/>
                                 <Dropdown>
                             <DropdownTrigger>
                                 <Button variant="ghost" color="primary">{bill.category || "Choose category"}</Button>
@@ -220,6 +230,7 @@ const UploadBillManually: React.FC<{ isOpen: boolean; onClose: () => void }> = (
                                 </div>
                             </ModalBody>
                             <ModalFooter>
+                            <Input type="file" accept="image/*" onChange={handleImageChange} /> {/* New file input */}
                                 <Button color="danger" variant="light" onPress={onClose}>
                                     Close
                                 </Button>

@@ -1,37 +1,34 @@
-// EmailInput.tsx
 "use client";
 import React from "react";
 import { Input } from "@nextui-org/react";
 
 interface EmailInputProps {
-    handleData: (data: string | (readonly string[] & string) | undefined) => void;
+  handleData: (data: string) => void;
 }
 
 const EmailInput: React.FC<EmailInputProps> = ({ handleData }) => {
-    const [value, setValue] = React.useState<string | (readonly string[] & string) | undefined>("");
+  const [value, setValue] = React.useState<string>("");
 
-    const validateEmail = (value: string | (readonly string[] & string) | undefined) => /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(value || "");
+  const validateEmail = (value: string) =>
+    /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(value);
 
-    // Effect to handle email validation and state updates
-    React.useEffect(() => {
-        const isInvalid = value === "" ? false : !validateEmail(value);
+  React.useEffect(() => {
+    handleData(value); // Always pass a string
+  }, [value, handleData]);
 
-        handleData(value); // Call to update the parent with the current value
-    }, [value, handleData]);
-
-    return (
-        <Input
-            value={value}
-            type="email"
-            label="Email"
-            variant="bordered"
-            isInvalid={value !== "" && !validateEmail(value)} // Check validity for UI
-            color={value !== "" && !validateEmail(value) ? "danger" : "success"}
-            errorMessage="Please enter a valid email"
-            onValueChange={setValue}
-            className="w-full"
-        />
-    );
-}
+  return (
+    <Input
+      value={value}
+      type="email"
+      label="Email"
+      variant="bordered"
+      isInvalid={value !== "" && !validateEmail(value)}
+      color={value !== "" && !validateEmail(value) ? "danger" : "success"}
+      errorMessage="Please enter a valid email"
+      onChange={(e) => setValue(e.target.value)}
+      className="w-full"
+    />
+  );
+};
 
 export default EmailInput;

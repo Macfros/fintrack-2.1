@@ -6,12 +6,13 @@ export interface BillModel {
     category: string;
     amount: number;
     secure_url?: string;
-    createdAt: Date; 
+    createdAt: string; 
     subItems: SubItemModel[];
+    billImage?: File; 
 }
 
 export interface SubItemModel {
-    id: number;
+    id?: number;
     name: string;
     amount: number;
 }

@@ -10,7 +10,7 @@ interface Props {
   }
 
 const ReduxWrapper: React.FC<Props> = ({ children }) => {
-  return <Provider store={store}> <Toaster /> {/* Include the Toaster here */}{children}</Provider>;
+  return <Provider store={store}> <Toaster /> {children}</Provider>;
 };
 
 export default ReduxWrapper;

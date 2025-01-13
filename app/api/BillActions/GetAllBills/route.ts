@@ -15,6 +15,9 @@ export async function GetAllBills(userId: string) {
       include: {
         subitems: true, // Include the subItems relation
       },
+      orderBy: {
+        createdAt: 'desc', // Sort by createdDate in descending order
+      },
     });
 
     if (bills.length === 0) {
@@ -47,7 +50,6 @@ export async function GetAllBills(userId: string) {
 export async function POST(request: NextRequest) {
   try {
     // Get session from NextAuth
-    const session = await getServerSession(authOptions);
 
     // Get token from request using next-auth/jwt
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });

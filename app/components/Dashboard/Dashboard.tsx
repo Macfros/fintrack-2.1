@@ -3,9 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { FiHome, FiUser, FiSettings } from 'react-icons/fi';
 import Sidebar, { SidebarItem } from '../Sidebar/Sidebar';
-import { User } from 'next-auth';
 import Homepage from "@/app/components/HomePage/Homepage"
-import Bills from '../Bills/Bills';
+import BillOperations from '../Bills/BillOperations';
 import { useAppDispatch } from '@/app/store/hooks';
 import { BillModel } from '@/app/Models/Models';
 import { setBills } from '@/app/store/slices/bill';
@@ -72,7 +71,7 @@ const Dashboard: React.FC<AppProps> = ({user}) => {
   }, [dispatch]);
 
   return (
-    <div className="flex">
+    <div className="flex w-full">
       <Sidebar>
 
         {sidebarItems.map((item,index) => (
@@ -85,10 +84,13 @@ const Dashboard: React.FC<AppProps> = ({user}) => {
           />
         ))}
         
+        
       </Sidebar>
       <main className="flex-grow p-4">
         {activePage === "Home" && <Homepage user={user} />}
-        {activePage === "Bills" && <h1><Bills /></h1>}
+        {activePage === "Bills" &&  <div className="w-full">
+            <BillOperations />
+          </div>}
         {activePage === "Settings" && <h1>Settings Page Content</h1>}
       </main>
     </div>

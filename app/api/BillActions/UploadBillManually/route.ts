@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/database'; // Adjust the import path for your Prisma client
 import { getToken } from 'next-auth/jwt'; // Use getToken for getting session in app directory
 import { NextApiRequest } from 'next';
+import { uploadImageToCloudinary } from '@/app/utils/UploadToCloudinary';
 
 // Define the uploadBillManually function
 const uploadBillManually = async (formData: FormData, token: any) => {
@@ -26,14 +27,23 @@ const uploadBillManually = async (formData: FormData, token: any) => {
         if (!user) {
             throw new Error('User not found');
         }
+        
+        let secureUrl = "";
+        const billImage = formData.get('billImage') as File | null;
 
+        if (billImage) {
+            // Upload the image to Cloudinary if it's provided
+            secureUrl = await uploadImageToCloudinary(billImage) || "";
+            console.log("API Secure url:",secureUrl);
+        }
+        
         // Create the photo record
         const newBill = await prisma.photo.create({
             data: {
                 name: name,
                 category: category,
                 amount: priceInt,
-                secure_url: "", // Add your logic to handle the secure_url if needed
+                secure_url: secureUrl, // Add your logic to handle the secure_url if needed
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 authorId: user.id,

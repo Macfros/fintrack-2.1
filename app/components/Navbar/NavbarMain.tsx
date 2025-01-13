@@ -21,6 +21,8 @@ const NavbarMain: React.FC<NavbarProps> = ({user = null}) =>{
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const {isOpen, onOpen, onClose} = useDisclosure();
 
+  // /console.log("image url: "+user?.image);
+
   const menuItems = [
     "Profile",
     "Dashboard",

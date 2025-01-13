@@ -2,8 +2,8 @@
 import { getServerSession } from "next-auth/next";
 import NavbarMain from "./components/Navbar/NavbarMain";
 import Dashboard from "./components/Dashboard/Dashboard";
-import { Toaster } from "react-hot-toast";
 import { authOptions } from "@/auth";
+import LoginScreen from "./components/LoginScreen/LoginScreen";
 
 export default async function Home() {
   // Get session data on the server-side
@@ -13,9 +13,11 @@ export default async function Home() {
   console.log("user:", user?.email); // This logs the user to the server-side console
 
   return (
-    <div>
+    <div className="flex flex-col min-h-screen">
       <NavbarMain user={user} />
-      {user ? <Dashboard user={user} /> : <h1>No User</h1>}
+      <div className="flex-1 flex">
+        {user ? <Dashboard user={user} /> : <LoginScreen />}
+      </div>
     </div>
   );
 }

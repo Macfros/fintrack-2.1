@@ -10,7 +10,7 @@ interface AvatarProps{
 
 const AvatarComponent: React.FC<AvatarProps> = ({img, name}) => {
   const avatarSrc = img || "@/public/placeholder.png";
-  
+  //console.log("Avatar Image:"+avatarSrc);
     return(
         <div className="flex items-center gap-4">
         <Dropdown placement="bottom-end">
