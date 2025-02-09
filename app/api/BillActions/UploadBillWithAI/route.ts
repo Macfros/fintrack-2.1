@@ -24,10 +24,7 @@ const UploadWithAI = async (formData: FormData, token: JWT): Promise<boolean | p
 
     try {
         const inputSource = await mindeeClient.docFromUrl(imageUrl);
-        const apiResponse = await mindeeClient.parse(mindee.product.ReceiptV5, inputSource);
-
-        // Handle the response from Mindee API
-        const resp = await apiResponse;
+        const resp = await mindeeClient.parse(mindee.product.ReceiptV5, inputSource);
 
         const bill = await prisma.photo.create({
             data: {

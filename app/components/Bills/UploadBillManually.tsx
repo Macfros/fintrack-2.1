@@ -230,7 +230,7 @@ const UploadBillManually: React.FC<{ isOpen: boolean; onClose: () => void }> = (
                                 </div>
                             </ModalBody>
                             <ModalFooter>
-                            <Input type="file" accept="image/*" onChange={handleImageChange} /> {/* New file input */}
+                            <Input  type="file" accept="image/*" onChange={handleImageChange} /> {/* New file input */}
                                 <Button color="danger" variant="light" onPress={onClose}>
                                     Close
                                 </Button>

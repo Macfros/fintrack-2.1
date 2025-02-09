@@ -45,7 +45,7 @@ const Dashboard: React.FC<AppProps> = ({user}) => {
   useEffect(() => {
     const fetchBills = async () => {
       try {
-        const response = await fetch('/api/BillActions/GetAllBills', {
+        const response = await fetch('/api/BillActions/FetchBills/GetAllBills', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

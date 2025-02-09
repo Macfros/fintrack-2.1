@@ -1,6 +1,6 @@
 "use client";
 
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { BillModel } from '@/app/Models/Models';
 
 interface BillState {
@@ -31,26 +31,36 @@ export const { setBills, addBill, deleteBill } = billSlice.actions;
 
 // Helper function to get current and previous month information
 const getCurrentAndPreviousMonths = () => {
-  const currentDate = new Date();
-  const currentMonth = currentDate.getMonth(); // 0 = January, 11 = December
-  const currentYear = currentDate.getFullYear();
+  const currentMonth = new Date().getMonth(); // 0 = January, 11 = December
+  const currentYear = new Date().getFullYear();
   
   const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1; // December is 11
   const previousMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
-
+  
   return { currentMonth, currentYear, previousMonth, previousMonthYear };
 };
 
 export const selectTotalAmount = (state: { bills: BillState }) => 
   state.bills.billList.reduce((total, bill) => total + bill.amount, 0);
 
-export const selectCurrentMonthAmount = (state: { bills: BillState }) => {
+export const lastMonthAmount = createSelector((state: { bills: BillState })=>state.bills.billList, (billList) => {
+  const {previousMonth, previousMonthYear} = getCurrentAndPreviousMonths();
+  return billList
+    .filter(bill => {
+      const billDate = new Date(bill.createdAt);
+      return (
+        billDate.getMonth() === previousMonth && 
+        billDate.getFullYear() === previousMonthYear
+      );
+    })
+    .reduce((total, bill) => total + bill.amount, 0);
+});
+
+export const selectCurrentMonthAmount = createSelector((state: { bills: BillState }) => state.bills.billList, lastMonthAmount, (billList, _lastMonthAmount) => {
   const currentMonthCard = { amount: 0, comparison: '' };
-  const { currentMonth, currentYear, previousMonth, previousMonthYear } = getCurrentAndPreviousMonths();
+  const { currentMonth, currentYear } = getCurrentAndPreviousMonths();
 
-  const _lastMonthAmount = lastMonthAmount(state, previousMonth, previousMonthYear);
-
-  currentMonthCard.amount = state.bills.billList
+  currentMonthCard.amount = billList
     .filter(bill => {
       const billDate = new Date(bill.createdAt);
       return (
@@ -70,24 +80,13 @@ export const selectCurrentMonthAmount = (state: { bills: BillState }) => {
   }
 
   return currentMonthCard;
-};
+});
 
-export const lastMonthAmount = (state: { bills: BillState }, previousMonth: number, previousMonthYear: number) => {
-  return state.bills.billList
-    .filter(bill => {
-      const billDate = new Date(bill.createdAt);
-      return (
-        billDate.getMonth() === previousMonth && 
-        billDate.getFullYear() === previousMonthYear
-      );
-    })
-    .reduce((total, bill) => total + bill.amount, 0);
-};
-
-export const mostSpentCategory = (state: { bills: BillState }) => {
+export const mostSpentCategory = createSelector((state: { bills: BillState }) => state.bills.billList,
+(billList) => {
   const categoryTotals: { [key: string]: number } = {};
 
-  state.bills.billList.forEach(bill => {
+  billList.forEach(bill => {
     if (categoryTotals[bill.category]) {
       categoryTotals[bill.category] += bill.amount;
     } else {
@@ -103,13 +102,14 @@ export const mostSpentCategory = (state: { bills: BillState }) => {
   }
 
   return mostSpent;
-};
+});
 
-export const MiscellaneousSpent = (state: { bills: BillState }) => {
+export const MiscellaneousSpent = createSelector((state: { bills: BillState }) => state.bills.billList,
+(billList) => {
   let miscellaneousCard = { amount: 0, comparison: "" };
   let amount = 0;
 
-  state.bills.billList.forEach(element => {
+  billList.forEach(element => {
     if (element.category === "Miscellaneous") {
       amount += element.amount;
     }
@@ -117,9 +117,9 @@ export const MiscellaneousSpent = (state: { bills: BillState }) => {
 
   miscellaneousCard.amount = amount;
 
-  const { currentMonth, currentYear, previousMonth, previousMonthYear } = getCurrentAndPreviousMonths();
+  const { previousMonth, previousMonthYear } = getCurrentAndPreviousMonths();
 
-  const lastMonthMiscellaneousAmount = state.bills.billList
+  const lastMonthMiscellaneousAmount = billList
     .filter(bill => {
       const billDate = new Date(bill.createdAt);
       return (
@@ -141,7 +141,7 @@ export const MiscellaneousSpent = (state: { bills: BillState }) => {
   }
 
   return miscellaneousCard;
-};
+});
 
 
 export default billSlice.reducer;
