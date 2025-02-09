@@ -4,7 +4,7 @@ import { User } from "next-auth";
 import InfoCard from "@/app/components/HomePage/InfoCard";
 import { IndianRupee } from "lucide-react";
 import { useAppSelector } from "@/app/store/hooks";
-import { MiscellaneousSpent, mostSpentCategory, selectCurrentMonthAmount, selectTotalAmount, setBills } from "@/app/store/slices/bill";
+import {  MiscellaneousSpentSelector, mostSpentCategorySelector, selectTotalAmountSelector, selectCurrentMonthAmountSelector, setBillSummary } from "@/app/store/slices/bill";
 import CustomCard from "./CustomCard";
 import { useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
@@ -20,8 +20,6 @@ interface AppProps {
 const Homepage: React.FC<AppProps> = ({ user }) => {
   const date = new Date();
   const monthName = date.toLocaleDateString('en-US', { month: 'long' });
-  const [spendingData, setSpendingData] = useState();
-
   const dispatch = useDispatch(); // ✅ Hook inside component
 
   useEffect(() => {
@@ -38,7 +36,7 @@ const Homepage: React.FC<AppProps> = ({ user }) => {
         const data = await response.json();
         console.log("Fetched spending summary:", data);
 
-        setSpendingData(data);
+        dispatch(setBillSummary(data));
         // 
       } catch (error) {
         console.error("Error fetching spending summary:", error);
@@ -55,11 +53,12 @@ const Homepage: React.FC<AppProps> = ({ user }) => {
     year: 'numeric', // "2024"
   });
 
-
-  const totalAmount =  useAppSelector(selectTotalAmount); // TODO: Fetch from DB
-  const currentMonthAmount  = useAppSelector(selectCurrentMonthAmount);
-  const maxSpentCategory = useAppSelector(mostSpentCategory);
-  const miscellaneousSpent = useAppSelector(MiscellaneousSpent);
+  const totalAmount = useAppSelector(selectTotalAmountSelector);
+  const currentMonthAmount = useAppSelector(selectCurrentMonthAmountSelector);
+  const maxSpentCategory = useAppSelector(mostSpentCategorySelector);
+  const miscellaneousSpent = useAppSelector(MiscellaneousSpentSelector);
+  
+   
   const comparisonSubtext = "50% more from last month"; // TODO: Fetch from DB
 
   return (
@@ -77,6 +76,7 @@ const Homepage: React.FC<AppProps> = ({ user }) => {
           <CustomCard cardTitle="Monthly Spend" cardFooter="This is the graphical representation of Monthly spend" cardContent={<IndianRupee />} />
           <CustomCard cardTitle="Total Spent" cardFooter="This is the graphical representation of Total spend" cardContent={<IndianRupee />} />
         </div>
+
       </div>
   );
 };
