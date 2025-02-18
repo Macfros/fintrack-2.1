@@ -16,7 +16,6 @@ const BillTable: React.FC = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isImageIvewModalOpen, setImageViewModalOpen] = useState(false);
-  const [url,setUrl] = useState<String | null | undefined>(null);
   const [selectedBill, setSelectedBill] = useState<BillModel | null>(null);
 
   const handleDeleteClick = (item: BillModel) => {
