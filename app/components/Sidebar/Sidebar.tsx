@@ -11,11 +11,16 @@ interface SidebarContextType {
 
 interface SidebarProps {
   children: ReactNode;
+  user?: {
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+  } | null;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ children }) => {
+const Sidebar: React.FC<SidebarProps> = ({ children, user }) => {
   const [expanded, setExpanded] = useState(true);
-
+  console.log("sidebar user:"+user);
   return (
     <aside className="h-screen z-10">
       <nav className="h-full flex flex-col bg-white border-r shadow-sm">
@@ -49,8 +54,8 @@ const Sidebar: React.FC<SidebarProps> = ({ children }) => {
             }`}
           >
             <div className="leading-4">
-              <h4 className="font-semibold">John Doe</h4>
-              <span className="text-xs text-gray-600">johndoe@gmail.com</span>
+              <h4 className="font-semibold">{user?.name}</h4>
+              <span className="text-xs text-gray-600">{user?.email}</span>
             </div>
             <FiMoreVertical size={20} />
           </div>

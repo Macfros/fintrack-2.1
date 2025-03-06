@@ -1,5 +1,5 @@
 "use client";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button } from "@nextui-org/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button } from "@heroui/react";
 import { FcGoogle } from "react-icons/fc";
 import EmailInput from "./EmailInput";
 import { useState, useEffect } from "react";

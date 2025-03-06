@@ -1,6 +1,6 @@
 "use client";
 
-import {Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Avatar, User} from "@nextui-org/react";
+import {Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Avatar, User} from "@heroui/react";
 import SignOutButtonProps from "./SignOutButton";
 
 interface AvatarProps{

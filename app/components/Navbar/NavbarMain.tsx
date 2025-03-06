@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import {Navbar, NavbarBrand, NavbarContent, NavbarItem, NavbarMenuToggle, NavbarMenu, NavbarMenuItem, Link, Button, useDisclosure} from "@nextui-org/react";
+import {Navbar, NavbarBrand, NavbarContent, NavbarItem, NavbarMenuToggle, NavbarMenu, NavbarMenuItem, Link, Button, useDisclosure} from "@heroui/react";
 import { User } from "next-auth";
 import LoginModal from "../auth/LoginModal";
 import AvatarComponent from "../auth/AvatarComponent";

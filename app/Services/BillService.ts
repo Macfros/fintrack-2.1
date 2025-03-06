@@ -263,7 +263,7 @@ export const UploadWithAI = async (formData: FormData, token: JWT): Promise<bool
 
         const bill = await prisma.photo.create({
             data: {
-                name: resp.document.inference.prediction.supplierName.value || "",
+                name: resp.document.inference.prediction.supplierName.value || " ",
                 category: resp.document.inference.prediction.category.value || " ",
                 amount: resp.document.inference.prediction.totalAmount.value || 0,
                 authorId: token?.id as string,  // Assuming token contains user information

@@ -8,7 +8,7 @@ import {
   ModalFooter,
   Button,
   ModalBody,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { BillModel, SubItemModel } from "@/app/Models/Models";
 
 interface BillDescriptionViewerProps {

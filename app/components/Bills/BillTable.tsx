@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Button } from "@nextui-org/react";
+import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Button } from "@heroui/react";
 import { BillModel } from "@/app/Models/Models";
 import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
 import { deleteBill } from "@/app/store/slices/bill";
@@ -114,13 +114,13 @@ const BillTable: React.FC = () => {
           <TableColumn key="createdAt" className="bg-black text-white">Date</TableColumn>
           <TableColumn key="actions" className="bg-black text-white">Actions</TableColumn>
         </TableHeader>
-        <TableBody items={billList}>
+        <TableBody items={billList || []}>
           {billList.map((item: BillModel, index: number) => (
             <TableRow key={index} className="align-middle">
               <TableCell className="align-middle">{index + 1}</TableCell>
-              <TableCell className="align-middle">{item.name}</TableCell>
-              <TableCell className="align-middle">{item.category}</TableCell>
-              <TableCell className="align-middle">{item.amount}</TableCell>
+              <TableCell className="align-middle">{item.name || " "}</TableCell>
+              <TableCell className="align-middle">{item.category || "Miscellaneous"}</TableCell>
+              <TableCell className="align-middle">{item.amount || "0.00"}</TableCell>
               <TableCell className="align-middle">{new Date(item.createdAt).toLocaleDateString('en-GB')}</TableCell>
               <TableCell className="align-middle">
                 <div className="flex gap-2">

@@ -1,37 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/database';
+import { ErrorResponse, SuccessResponse } from '@/app/utils/responseHandler';
+import { PieChartMonthly } from '@/app/Services/DashBoardService';
 
 // Fetch all bills for a user
-async function GetAllBills(userId: string) {
-  try {
-    const bills = await prisma.photo.findMany({
-      where: { authorId: userId },
-      include: { subitems: true },
-      orderBy: { createdAt: 'desc' },
-    });
 
-    if (!bills.length) console.log("No Bills returned in GetAllBills");
-
-    return bills.map(bill => ({
-      id: bill.id,
-      name: bill.name,
-      category: bill.category,
-      amount: bill.amount,
-      secure_url: bill.secure_url,
-      createdAt: bill.createdAt,
-      subItems: bill.subitems.map(subitem => ({
-        name: subitem.name,
-        amount: subitem.amount,
-      })),
-    }));
-  } catch (e) {
-    console.error("Error in GetAllBills:", e);
-    return [];
-  }
-}
 
 // POST request handler
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
     // Since middleware already ensures authentication, extract userId from request headers
     const userId = request.headers.get("x-user-id");
@@ -40,16 +15,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "User ID missing from request" }, { status: 400 });
     }
 
+    const Month = new Date().getMonth();
     // Fetch bills
-    const bills = await GetAllBills(userId);
-
-    if (!bills.length) {
+    const piechartData = await PieChartMonthly(userId, Month);
+    
+    if (!piechartData) {
       return NextResponse.json({ message: "No bills found" }, { status: 404 });
     }
 
-    return NextResponse.json(bills);
+    return SuccessResponse(piechartData);
+
   } catch (error) {
-    console.error("Error in API handler:", error);
-    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
+    console.log(error);
+    return ErrorResponse("Internal Server Error",500);
   }
 }

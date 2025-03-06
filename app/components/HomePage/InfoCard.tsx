@@ -1,4 +1,4 @@
-import { Card, CardHeader, CardBody, CardFooter, Divider } from "@nextui-org/react";
+import { Card, CardHeader, CardBody, CardFooter, Divider } from "@heroui/react";
 import React from "react";
 import { LucideIcon, IndianRupee } from "lucide-react";
 

@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Button } from "@nextui-org/button";
+import { Button } from "@heroui/button";
 import { FcGoogle } from "react-icons/fc";
 import { handleGoogleLogin, signInWithMagicLinks } from "../auth/AuthFunctions";
 import EmailInput from "../auth/EmailInput";

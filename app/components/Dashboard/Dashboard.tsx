@@ -57,9 +57,10 @@ const Dashboard: React.FC<AppProps> = ({user}) => {
           throw new Error('Network response was not ok');
         }
 
-        const data: BillModel[] = await response.json();
+        const responseData = await response.json(); // Extract full response
+        const bills: BillModel[] = responseData.data; // Extract `data`
         //console.log(data);
-        dispatch(setBills(data));
+        dispatch(setBills(bills));
         
       } catch (e) {
         console.error('Error fetching bills:', e);
@@ -72,8 +73,7 @@ const Dashboard: React.FC<AppProps> = ({user}) => {
 
   return (
     <div className="flex w-full">
-      <Sidebar>
-
+      <Sidebar user={user}>
         {sidebarItems.map((item,index) => (
           <SidebarItem
               key={index}
@@ -83,9 +83,9 @@ const Dashboard: React.FC<AppProps> = ({user}) => {
               onClick={() => handleSetActivePage(`${item.page}`)}
           />
         ))}
-        
-        
       </Sidebar>
+
+      
       <main className="flex-grow p-4">
         {activePage === "Home" && <Homepage user={user} />}
         {activePage === "Bills" &&  <div className="w-full">

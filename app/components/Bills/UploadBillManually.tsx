@@ -1,7 +1,7 @@
-import { Button } from "@nextui-org/button";
+import { Button } from "@heroui/button";
 import { IndianRupee, ReceiptText, Trash } from "lucide-react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Input } from "@nextui-org/react";
-import {Dropdown, DropdownTrigger, DropdownMenu, DropdownItem} from "@nextui-org/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Input } from "@heroui/react";
+import {Dropdown, DropdownTrigger, DropdownMenu, DropdownItem} from "@heroui/react";
 import { useState, ChangeEvent } from "react";
 import { BillModel, SubItemModel } from "@/app/Models/Models";
 import toast from 'react-hot-toast';
@@ -132,14 +132,14 @@ const UploadBillManually: React.FC<{ isOpen: boolean; onClose: () => void }> = (
                 throw new Error('Network response was not ok');
             }
     
-            const result = await response.json(); // Parse the JSON response
+            const {data} = await response.json(); // Parse the JSON response
 
             const mappedResult = {
-                ...result,
-                subItems: result.subitems || [], // Map 'subitems' to 'subItems'
+                ...data,
+                subItems: data.subitems || [], // Map 'subitems' to 'subItems'
             };
 
-            console.log('Response:', result);
+            console.log('Response:', data);
             toast.success("Bill Uploaded!");
             dispatch(addBill(mappedResult));
             

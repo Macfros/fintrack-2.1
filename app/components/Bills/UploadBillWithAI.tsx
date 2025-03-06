@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Button } from "@nextui-org/button";
-import { Modal, ModalBody, ModalContent, ModalHeader } from "@nextui-org/react";
+import { Button } from "@heroui/button";
+import { Modal, ModalBody, ModalContent, ModalHeader } from "@heroui/react";
 import toast from "react-hot-toast";
 import { useAppDispatch } from "@/app/store/hooks";
 import { addBill } from "@/app/store/slices/bill";
@@ -63,11 +63,11 @@ const UploadBillWithAI: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
 
       if (response.ok) {
         toast.success("Bill Uploaded!");
-        const { bill } = await response.json();
-        console.log("bill came:",bill);
-        dispatch(addBill(bill));
+        const { data } = await response.json();
+        console.log("bill came:",data);
+        dispatch(addBill(data));
         setImagePreview(null);
-        setImageFile(null);
+        setImageFile(null); 
         onClose();
         
       } else {
