@@ -5,19 +5,20 @@ import type { NextRequest } from "next/server";
 export async function middleware(request: NextRequest) {
     console.log("Middleware token checking");
 
-    const allowedOrigin = process.env.ALLOWED_ORIGIN;
-    const requestOrigin = request.headers.get("origin");
+    // const allowedOrigin = process.env.ALLOWED_ORIGIN;
+    // const requestOrigin = request.headers.get("origin");
 
     // ✅ Allow NextAuth requests
     if (request.nextUrl.pathname.startsWith("/api/auth")) {
         return NextResponse.next();
     }
 
-    // ✅ Apply origin check only for protected API routes
-    if (!requestOrigin || requestOrigin !== allowedOrigin) {
-        return NextResponse.json({ message: "Forbidden" }, { status: 403 });
-    }
-
+    // // ✅ Apply origin check only for protected API routes
+    // if (requestOrigin && allowedOrigin && requestOrigin !== allowedOrigin) {
+    //     console.log("Origin check failed", { requestOrigin, allowedOrigin });
+    //     return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    // }
+    
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
 
     if (!token || !token.sub) {

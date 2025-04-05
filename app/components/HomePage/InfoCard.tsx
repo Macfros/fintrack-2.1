@@ -26,7 +26,7 @@ const InfoCard: React.FC<AppProps> = ({ title, icon: Icon, date, amount, subtext
         <Icon className="w-50" />
       </CardHeader>
       <Divider />
-      <CardBody className="flex flex-row text-5xl">
+      <CardBody className="flex flex-row items-center gap-1 text-2xl sm:text-3xl md:text-4xl">
         <p><IndianRupee /></p>
         {/* Apply the format function here */}
         <p>{formatAmount(amount)}</p>

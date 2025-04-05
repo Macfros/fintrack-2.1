@@ -37,7 +37,7 @@ const NavbarMain: React.FC<NavbarProps> = ({user = null}) =>{
   ];
 
   return (
-    <Navbar onMenuOpenChange={setIsMenuOpen}>
+    <Navbar onMenuOpenChange={setIsMenuOpen} className="fixed">
       <NavbarContent>
         <NavbarMenuToggle
           aria-label={isMenuOpen ? "Close menu" : "Open menu"}

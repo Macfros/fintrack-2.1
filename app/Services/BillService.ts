@@ -182,7 +182,8 @@ export async function getSpendingSummary(userId: string) {
 export const uploadBillManually = async (formData: FormData, token: any) => {
     try {
         const name = formData.get('name') as string;
-        const category = formData.get('category') as string;
+        const rawCategory = formData.get("category") as string;
+        const category = rawCategory?.trim() ? rawCategory : "Miscellaneous";
         const price = formData.get('amount') as string;
         const priceInt = parseFloat(price);
         const subItemsArray = JSON.parse(formData.get('subItems') as string);
@@ -264,7 +265,7 @@ export const UploadWithAI = async (formData: FormData, token: JWT): Promise<bool
         const bill = await prisma.photo.create({
             data: {
                 name: resp.document.inference.prediction.supplierName.value || " ",
-                category: resp.document.inference.prediction.category.value || " ",
+                category: resp.document.inference.prediction.category.value || "Miscellaneous",
                 amount: resp.document.inference.prediction.totalAmount.value || 0,
                 authorId: token?.id as string,  // Assuming token contains user information
                 secure_url: imageUrl,

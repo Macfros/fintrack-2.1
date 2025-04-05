@@ -6,11 +6,9 @@ import { authOptions } from "@/auth";
 import LoginScreen from "./components/LoginScreen/LoginScreen";
 
 export default async function Home() {
-  // Get session data on the server-side
   const session = await getServerSession(authOptions);
-  const user = session?.user; // Access the user from the session
-
-  console.log("user:", user?.email); // This logs the user to the server-side console
+  const user = session?.user; 
+  console.log("user:", user?.email); 
 
   return (
     <div className="flex flex-col min-h-screen">
