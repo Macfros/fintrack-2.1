@@ -30,9 +30,9 @@ const renderSubItems = (subItems: SubItemModel[] | undefined) => {
   return (
     <>
       {subItems.map((subItem: SubItemModel, index: number) => (
-        <tr key={index} className="even:bg-gray-200"> {/* Apply bg-gray-400 to even rows */}
+        <tr key={index} className="even:bg-gray-200"> 
           <td className="p-3">{subItem.name || "N/A"}</td>
-          <td className="p-3">{subItem.amount || 0}</td> {/* Safeguard amount */}
+          <td className="p-3">{subItem.amount || 0}</td> 
         </tr>
       ))}
     </>

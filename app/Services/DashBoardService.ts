@@ -42,7 +42,7 @@ export async function PieChartData(userId: string, month: number, year: number){
   }
 
 
-  export async function GraphData(userId: string, year: number) {
+export async function GraphData(userId: string, year: number) {
     try {
       const graphData = await prisma.photo.groupBy({
         by: ["createdAt"],

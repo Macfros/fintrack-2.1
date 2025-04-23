@@ -2,7 +2,6 @@
 
 import React from "react";
 import {Navbar, NavbarBrand, NavbarContent, NavbarItem, NavbarMenuToggle, NavbarMenu, NavbarMenuItem, Link, Button, useDisclosure} from "@heroui/react";
-import { User } from "next-auth";
 import LoginModal from "../auth/LoginModal";
 import AvatarComponent from "../auth/AvatarComponent";
 import Image from 'next/image'
@@ -37,7 +36,7 @@ const NavbarMain: React.FC<NavbarProps> = ({user = null}) =>{
   ];
 
   return (
-    <Navbar onMenuOpenChange={setIsMenuOpen} className="fixed">
+    <Navbar onMenuOpenChange={setIsMenuOpen} className="sticky top-0 z-50">
       <NavbarContent>
         <NavbarMenuToggle
           aria-label={isMenuOpen ? "Close menu" : "Open menu"}

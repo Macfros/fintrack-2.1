@@ -35,7 +35,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
           <div>
             <ModalHeader className="flex flex-col gap-1">Login</ModalHeader>
             <ModalBody>
-              <Button size="lg" className="w-full" onClick={handleGoogleLogin} color="success" variant="flat">
+              <Button size="lg" className="w-full" onPress={handleGoogleLogin} color="success" variant="flat">
                 Sign in using Google Account <FcGoogle size={20} />
               </Button>
 

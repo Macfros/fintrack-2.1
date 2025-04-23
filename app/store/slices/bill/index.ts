@@ -41,10 +41,9 @@ export const billSlice = createSlice({
 
 export const { setBills, addBill, deleteBill, setBillSummary } = billSlice.actions;
 
-export const selectTotalAmountSelector = createSelector(
-  (state: { bills: BillState }) => state.bills.summary?.totalAmount || 0,
-  (totalAmount) => totalAmount
-);
+// Fixed version:
+export const selectTotalAmountSelector = (state: { bills: BillState }) => 
+  state.bills.summary?.totalAmount || 0;
 
 const defaultCurrentMonthAmount = { amount: 0, comparison: "" };
 const defaultMostSpentCategory = { category: "", total: 0 };

@@ -6,6 +6,7 @@ export const signInWithMagicLinks = async (
     email: string,
     setLoading: (value: boolean) => void,
     setEmailSent: (value: boolean) => void
+
   ) => {
     
     if (!email) {
@@ -18,12 +19,14 @@ export const signInWithMagicLinks = async (
     try {
       const result = await signIn("email", { email, redirect: false });
       if (result?.error) throw new Error(result.error);
-  
       setEmailSent(true);
+
     } catch (error) {
       console.error("Error during sign-in:", error);
       toast.error("Error during sign-in. Please try again.");
+
     } finally {
+
       setLoading(false);
     }
   };
@@ -31,6 +34,7 @@ export const signInWithMagicLinks = async (
 export const handleGoogleLogin = async () => {
   try {
     await signIn("google");
+    
   } catch (error) {
     console.error("Error during Google Sign-in:", error);
     toast.error("Error during Google Sign-in. Please try again.");

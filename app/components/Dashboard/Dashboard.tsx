@@ -1,16 +1,13 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import dynamic from "next/dynamic";
+import React, { useEffect, useState, useCallback } from 'react';
 import { FiHome, FiUser, FiSettings } from 'react-icons/fi';
 import Sidebar, { SidebarItem } from '../Sidebar/Sidebar';
-import Homepage from "@/app/components/HomePage/Homepage"
-import BillOperations from '../Bills/BillOperations';
-import { useAppDispatch } from '@/app/store/hooks';
-import { BillModel } from '@/app/Models/Models';
-import { setBills } from '@/app/store/slices/bill';
+const Homepage = dynamic(() => import("@/app/components/HomePage/Homepage"));
+const BillOperations = dynamic(() => import("../Bills/BillOperations"));
 
-
-interface AppProps{
+interface AppProps {
   user?: {
     name?: string | null;
     email?: string | null;
@@ -19,78 +16,42 @@ interface AppProps{
 }
 
 const sidebarItems = [
-  {
-    icon: <FiHome />,
-    page: "Home",
-  },
-  {
-    icon: <FiUser />,
-    page: "Bills",
-  },
-  {
-    icon: <FiSettings />,
-    page: "Settings",
-  }
+  { icon: <FiHome />, page: "Home" },
+  { icon: <FiUser />, page: "Bills" },
+  { icon: <FiSettings />, page: "Settings" }
 ];
 
-const Dashboard: React.FC<AppProps> = ({user}) => {
-  const [activePage, setActivePage] = useState<string>("Home");
-  const dispatch = useAppDispatch();
+const Dashboard: React.FC<AppProps> = ({ user }) => {
+  const [activePage, setActivePage] = useState("Home");
 
-  const handleSetActivePage = (page: string) => {
-    console.log(page);
+  const handleSetActivePage = useCallback((page: string) => {
     setActivePage(page);
-  };
+  }, []);
 
-  useEffect(() => {
-    const fetchBills = async () => {
-      try {
-        const response = await fetch('/api/BillActions/FetchBills/GetAllBills', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ user }), // Send the user object as JSON
-        });
-
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-
-        const responseData = await response.json(); // Extract full response
-        const bills: BillModel[] = responseData.data; // Extract `data`
-        //console.log(data);
-        dispatch(setBills(bills));
-        
-      } catch (e) {
-        console.error('Error fetching bills:', e);
-      }
-    };
-
-    fetchBills();
-    
-  }, [dispatch]);
+  // Bills are now fetched inside BillOperations
+  useEffect(() => {}, [user]);
 
   return (
-    <div className="flex w-full">
+    <div className="flex w-full overflow-x-hidden">
       <Sidebar user={user}>
-        {sidebarItems.map((item,index) => (
+        {sidebarItems.map((item, i) => (
           <SidebarItem
-              key={index}
-              icon={item.icon}
-              text={item.page}
-              active={activePage === `${item.page}`}
-              onClick={() => handleSetActivePage(`${item.page}`)}
+            key={i}
+            icon={item.icon}
+            text={item.page}
+            active={activePage === item.page}
+            onClick={() => handleSetActivePage(item.page)}
           />
         ))}
       </Sidebar>
 
-      
-      <main className="flex-grow p-4">
+      <main className="flex-grow p-4 min-w-0">
         {activePage === "Home" && <Homepage user={user} />}
-        {activePage === "Bills" &&  <div className="w-full">
-            <BillOperations />
-          </div>}
+        {activePage === "Bills" && (
+          <div className="w-full">
+            <BillOperations user={user} />
+          </div>
+        )}
         {activePage === "Settings" && <h1>Settings Page Content</h1>}
       </main>
     </div>
