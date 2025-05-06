@@ -1,20 +1,26 @@
 "use client";
 
 import React from "react";
-import {Navbar, NavbarBrand, NavbarContent, NavbarItem, NavbarMenuToggle, NavbarMenu, NavbarMenuItem, Link, Button, useDisclosure} from "@nextui-org/react";
-import { User } from "next-auth";
+import {Navbar, NavbarBrand, NavbarContent, NavbarItem, NavbarMenuToggle, NavbarMenu, NavbarMenuItem, Link, Button, useDisclosure} from "@heroui/react";
 import LoginModal from "../auth/LoginModal";
 import AvatarComponent from "../auth/AvatarComponent";
 import Image from 'next/image'
 import { IoMdLogIn } from "react-icons/io";
 
-interface NavbarProps{
-  user?: User | null;
+
+interface NavbarProps {
+  user?: {
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+  } | null; // Or directly use `User | null` if you're using next-auth User type
 }
 
 const NavbarMain: React.FC<NavbarProps> = ({user = null}) =>{
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const {isOpen, onOpen, onClose} = useDisclosure();
+
+  // /console.log("image url: "+user?.image);
 
   const menuItems = [
     "Profile",
@@ -30,7 +36,7 @@ const NavbarMain: React.FC<NavbarProps> = ({user = null}) =>{
   ];
 
   return (
-    <Navbar onMenuOpenChange={setIsMenuOpen}>
+    <Navbar onMenuOpenChange={setIsMenuOpen} className="sticky top-0 z-50">
       <NavbarContent>
         <NavbarMenuToggle
           aria-label={isMenuOpen ? "Close menu" : "Open menu"}

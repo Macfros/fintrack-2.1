@@ -1,75 +1,183 @@
-import React, { useEffect, useState } from "react";
-import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Spinner, Button } from "@nextui-org/react";
-import { TableItem } from "@/app/Models/Models";
+import React, { useState } from "react";
+import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Button } from "@heroui/react";
+import { BillModel } from "@/app/models/Models";
+import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
+import { deleteBill } from "@/app/store/slices/bill";
+import { Download, Eye, List, Trash } from "lucide-react";
+import toast from "react-hot-toast";
+import DeleteConfirmationModal from "./DeleteConfirmationModal";
+import BillDescriptionViewer from "./BillDescriptionViewer";
+import ViewPhotoModal from "./ViewPhotoModal";
+import {
+  useDeleteBillMutation,
+} from "@/app/store/api/bill.api"
 
 const BillTable: React.FC = () => {
-  const [bills, setBills] = useState<TableItem[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const billList = useAppSelector((state) => state.bills.billList);
+  const dispatch = useAppDispatch();
+  
+  const[deleteBillApi , { isLoading, error, isSuccess }] = useDeleteBillMutation();
 
-  useEffect(() => {
-    fetchBills();
-  }, []);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isImageIvewModalOpen, setImageViewModalOpen] = useState(false);
+  const [selectedBill, setSelectedBill] = useState<BillModel | null>(null);
 
-  const fetchBills = async () => {
+  const handleDeleteClick = (item: BillModel) => {
+    setSelectedBill(item);  
+    setIsDeleteModalOpen(true);   
+  };
+
+  const handleViewer = (item: BillModel) => {
+    setSelectedBill(item);
+    setIsViewModalOpen(true);
+  }
+
+  const handleImageViewer = (bill: BillModel) => {
+    setSelectedBill(bill);
+    setImageViewModalOpen(true);
+  }
+
+  const DownloadButton = async (bill: BillModel | null) => {
+    if (bill == null) return;
+
+    const secureUrl = bill.secure_url; // Assuming `secureurl` is the property containing the image URL
+    if (!secureUrl) return;
+  
     try {
-      const response = await fetch('/api/BillActions/GetAllBills', {
-        method: 'POST'
-      });
-
+      // Fetch the image as a Blob
+      const response = await fetch(secureUrl);
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error(`Failed to fetch image: ${response.statusText}`);
       }
+  
+      const blob = await response.blob();
+  
+      // Create a download link
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'image.jpg'; // You can customize the filename here
+  
+      // Trigger the download
+      document.body.appendChild(link);
+      link.click();
+  
+      // Clean up the link element and revoke the object URL
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
 
-      const data: TableItem[] = await response.json();
-      setBills(data);
+    } catch (error) {
+      console.error('Error downloading the image:', error);
+    }
+  } 
 
-    } catch (e: any) {
-      console.error(e);
-      setError('Error fetching bills');
-    } finally {
-      setLoading(false);
+
+  const confirmDelete = async () => {
+    if (selectedBill) {
+      try {
+        const result = await deleteBillApi(selectedBill.id); // use mutation
+  
+        if (error) {
+          toast.error("Failed to delete bill!");
+          return;
+        }
+
+        dispatch(deleteBill(selectedBill)); // optional if you're managing local state too
+        toast.success("Bill Deleted!");
+      } catch (error) {
+        toast.error("Something went wrong!");
+      } finally {
+        setIsDeleteModalOpen(false);
+      }
     }
   };
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-screen">
-      <Spinner />
-    </div>
-  );
-  
-  if (error) return <div>{error}</div>;
-
   return (
-    <Table
-      isHeaderSticky
-      aria-label="Example table with client side sorting"
-      classNames={{
-        base: "max-h-[520px] overflow-scroll",
-        table: "min-h-[420px]",
-      }}
-    >
-      <TableHeader>
-        <TableColumn key="sno" className="bg-black text-white">S.no</TableColumn>
-        <TableColumn key="name" className="bg-black text-white">Name</TableColumn>
-        <TableColumn key="category" className="bg-black text-white">Category</TableColumn>
-        <TableColumn key="amount" className="bg-black text-white">Amount</TableColumn>
-        <TableColumn key="createdAt" className="bg-black text-white">Date</TableColumn>
-        <TableColumn key="actions" className="bg-black text-white">Actions</TableColumn>
-      </TableHeader>
-      <TableBody items={bills}>
-        {bills.map((item: TableItem, index: number) => (
-          <TableRow key={item.id}>
-            <TableCell>{index + 1}</TableCell>
-            <TableCell>{item.name}</TableCell>
-            <TableCell>{item.category}</TableCell>
-            <TableCell>{item.amount}</TableCell>
-            <TableCell>{new Date(item.createdAt).toLocaleDateString('en-GB')}</TableCell>
-            <TableCell> ... </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+    <>
+      <Table
+        isHeaderSticky
+        aria-label="Example table with client side sorting"
+        isStriped
+        classNames={{
+          base: "max-h-[500px] overflow-scroll mt-5",
+          table: "min-h-[400px]",
+          wrapper: "p-0"
+        }}
+      >
+        <TableHeader className="">
+          <TableColumn key="sno" className="bg-black text-white">S.no</TableColumn>
+          <TableColumn key="name" className="bg-black text-white">Name</TableColumn>
+          <TableColumn key="category" className="bg-black text-white">Category</TableColumn>
+          <TableColumn key="amount" className="bg-black text-white">Amount</TableColumn>
+          <TableColumn key="createdAt" className="bg-black text-white">Date</TableColumn>
+          <TableColumn key="actions" className="bg-black text-white">Actions</TableColumn>
+        </TableHeader>
+        <TableBody items={billList || []}>
+          {billList.map((item: BillModel, index: number) => (
+            <TableRow key={index} className="align-middle">
+              <TableCell className="align-middle">{index + 1}</TableCell>
+              <TableCell className="align-middle">{item.name || " "}</TableCell>
+              <TableCell className="align-middle">{item.category || "Miscellaneous"}</TableCell>
+              <TableCell className="align-middle">{item.amount || "0.00"}</TableCell>
+              <TableCell className="align-middle">{new Date(item.createdAt).toLocaleDateString('en-GB')}</TableCell>
+              <TableCell className="align-middle">
+                <div className="flex gap-2">
+                <Button
+                  onPress={() => handleViewer(item)}
+                  isIconOnly
+                  color="success"
+                  variant="ghost"
+                  aria-label="View Bill"
+                >
+                  <List />
+                </Button>
+                <Button
+                  onPress={() => handleDeleteClick(item)}
+                  isIconOnly
+                  color="danger"
+                  variant="ghost"
+                  aria-label="Delete Bill"
+                >
+                  <Trash />
+                </Button>
+                <Button
+                  onPress={() => handleImageViewer(item)}
+                  isIconOnly
+                  color="success"
+                  variant="ghost"
+                  aria-label="View Bill"
+                >
+                  <Eye />
+                </Button>
+                </div>
+              </TableCell>
+            </TableRow>          
+          ))}
+        </TableBody>
+      </Table>
+      
+      <BillDescriptionViewer
+          isOpen={isViewModalOpen}
+          onClose={() => setIsViewModalOpen(false)}
+          itemName={selectedBill}
+        />
+
+      {/* Reusable Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={confirmDelete}
+        itemName={selectedBill?.name || "this bill"}
+      />
+
+      <ViewPhotoModal
+         isOpen={isImageIvewModalOpen}
+         onClose={() => setImageViewModalOpen(false)}
+         onConfirm={()=> DownloadButton(selectedBill)}
+         itemName={selectedBill!}
+      />
+
+    </>
   );
 };
 
