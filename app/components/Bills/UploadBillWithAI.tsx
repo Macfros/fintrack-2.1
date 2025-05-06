@@ -4,16 +4,19 @@ import { Modal, ModalBody, ModalContent, ModalHeader } from "@heroui/react";
 import toast from "react-hot-toast";
 import { useAppDispatch } from "@/app/store/hooks";
 import { addBill } from "@/app/store/slices/bill";
+import { useAddAiBillMutation } from "@/app/store/api/bill.api"; // ← ensure correct path
 
-const UploadBillWithAI: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
-  isOpen,
-  onClose,
-}) => {
-    const dispatch = useAppDispatch();
+interface Props {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const UploadBillWithAI: React.FC<Props> = ({ isOpen, onClose }) => {
+  const dispatch = useAppDispatch();
   const [dragOver, setDragOver] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [addAiBill, { isLoading }] = useAddAiBillMutation();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -35,7 +38,7 @@ const UploadBillWithAI: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
   const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setDragOver(false);
-    const file = event.dataTransfer.files[0];
+    const file = event.dataTransfer.files?.[0];
     if (file) {
       setImageFile(file);
       const reader = new FileReader();
@@ -46,38 +49,23 @@ const UploadBillWithAI: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
 
   const handleSubmit = async () => {
     if (!imageFile) {
-      alert("Please upload an image before submitting.");
+      toast.error("Please upload an image before submitting.");
       return;
     }
-
-    setLoading(true);
 
     const formData = new FormData();
     formData.append("file", imageFile);
 
     try {
-      const response = await fetch("/api/BillActions/UploadBillWithAI", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (response.ok) {
-        toast.success("Bill Uploaded!");
-        const { data } = await response.json();
-        console.log("bill came:",data);
-        dispatch(addBill(data));
-        setImagePreview(null);
-        setImageFile(null); 
-        onClose();
-        
-      } else {
-        const errorResponse = await response.json(); // Parse the error message from the response body
-        toast.error(errorResponse.message || "An error occurred while uploading.");
-      }
+      const result = await addAiBill(formData).unwrap();
+      toast.success("Bill uploaded!");
+      dispatch(addBill(result));
+      setImageFile(null);
+      setImagePreview(null);
+      onClose();
     } catch (error: any) {
-        toast.error(error.message || "An unexpected error occured");
-    } finally {
-      setLoading(false);
+      console.error(error);
+      toast.error(error.message || "An unexpected error occurred.");
     }
   };
 
@@ -122,10 +110,10 @@ const UploadBillWithAI: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
             <Button
               color="success"
               onPress={handleSubmit}
-              isDisabled={loading}
+              isDisabled={isLoading}
               className="w-full"
             >
-              {loading ? "Uploading..." : "Submit"}
+              {isLoading ? "Uploading..." : "Submit"}
             </Button>
           </div>
         </ModalBody>

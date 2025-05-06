@@ -37,7 +37,7 @@ export async function PieChartData(userId: string, month: number, year: number){
 
     } catch (e) {
       console.error("Error in PieChartData:", e);
-      return [];
+      return {};
     }
   }
 

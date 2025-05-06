@@ -1,20 +1,14 @@
-import { UploadWithAI } from "@/app/Services/BillService";
+import { UploadWithAI } from "@/app/services/BillService";
 import { ErrorResponse, SuccessResponse } from "@/app/utils/responseHandler";
-import { getToken } from "next-auth/jwt";
+import { NextRequest } from 'next/server';
 
-export async function POST(request: any) {
+export async function POST(request: NextRequest) {
     try {
+        const userId = request.headers.get('x-user-id')!;
         const formData = await request.formData(); // Get form data from the request
 
-        // Use getToken to retrieve the user's session token from the request
-        const token = await getToken({ req: request });
-
-        if (!token) {
-            return ErrorResponse("Unauthorized", 401);
-        }
-
         // Call the UploadWithAI function and pass formData and token
-        const bill = await UploadWithAI(formData, token);
+        const bill = await UploadWithAI(formData, userId);
 
         // Return success response
         if (!bill) {

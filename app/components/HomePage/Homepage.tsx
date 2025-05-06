@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useMemo } from "react";
-import InfoCard from "@/app/components/HomePage/InfoCard";
+import InfoCard from "@/app/components/homePage/InfoCard";
 import { IndianRupee } from "lucide-react";
 import { useAppSelector } from "@/app/store/hooks";
 import {
@@ -12,10 +12,17 @@ import {
   setBillSummary,
 } from "@/app/store/slices/bill";
 import CustomCard from "./CustomCard";
-import { useDispatch } from "react-redux";
-import PieChart from "../Charts/PieChart";
+import PieChart from "../charts/PieChart";
 import toast from "react-hot-toast";
-import BarGraph from "../Charts/BarGraph";
+import BarGraph from "../charts/BarGraph";
+import { useDispatch } from "react-redux";
+import {
+  useGetBarGraphMutation,
+  useGetBillSummaryQuery,
+  useGetPieChartMonthlyMutation,
+  useGetPieChartYearlyMutation,
+} from "@/app/store/api/stats.api"; // ✅ New import for RTK mutation hooks
+import { BarGraphResponse } from "@/app/models/Models";
 
 interface AppProps {
   user?: {
@@ -28,7 +35,63 @@ interface AppProps {
 const Homepage: React.FC<AppProps> = ({ user }) => {
   const dispatch = useDispatch();
 
-  // Memoize the current date to avoid recreating it multiple times
+  // Fetch spending summary via RTK Query
+  const {
+    data: summaryData,
+    isLoading: summaryLoading,
+    error: summaryError,
+  } = useGetBillSummaryQuery();
+
+  // Dispatch summary into Redux store when loaded
+  useEffect(() => {
+    if (summaryData) {
+      dispatch(setBillSummary(summaryData));
+    }
+  }, [summaryData, dispatch]);
+
+  // Local state for charts
+  const [chartsLoading, setChartsLoading] = useState(true);
+  const [pieChartMonthlyData, setPieChartMonthlyData] = useState<any[]>([]);
+  const [pieChartYearlyData, setPieChartYearlyData] = useState<any[]>([]);
+  const [graphData, setGraphData] = useState<BarGraphResponse>();
+
+
+  const [getMonthly, { isLoading: loadingMonthly }] = useGetPieChartMonthlyMutation();
+  const [getYearly, { isLoading: loadingYearly }] = useGetPieChartYearlyMutation();
+  const [getBarGraphYearly, {isLoading: loadingBarYearly}] = useGetBarGraphMutation();
+
+  // ✅ Fetch pie chart data via RTK Query instead of fetch()
+  useEffect(() => {
+    const fetchCharts = async () => {
+      setChartsLoading(true);
+      try {
+        const month = new Date().getMonth();
+        const year = new Date().getFullYear();
+
+        const [monthlyRes, yearlyRes, barGraphData] = await Promise.all([
+          getMonthly({ month, year }).unwrap(),
+          getYearly({ year }).unwrap(),
+          getBarGraphYearly({ year }).unwrap()
+        ]);
+
+        setPieChartMonthlyData(monthlyRes.monthly || []);
+        setPieChartYearlyData(yearlyRes.yearly || []);
+        setGraphData(barGraphData);
+
+      } catch (err) {
+        console.error("Error:",err);
+        toast.error("Failed to load chart data");
+      } finally {
+        setChartsLoading(false);
+      }
+    };
+    fetchCharts();
+  }, [getMonthly, getYearly, getBarGraphYearly]);
+
+  // Combined loading state
+  const loading = summaryLoading || chartsLoading || loadingMonthly || loadingYearly;
+
+  // Memoize date formatting
   const date = useMemo(() => new Date(), []);
   const monthName = useMemo(
     () => date.toLocaleDateString("en-US", { month: "long" }),
@@ -45,66 +108,11 @@ const Homepage: React.FC<AppProps> = ({ user }) => {
     [date]
   );
 
-  const [loading, setLoading] = useState(true);
-  const [pieChartMonthlyData, setPieChartMonthlyData] = useState([]);
-  const [pieChartYearlyData, setPieChartYearlyData] = useState([]);
-  const [graphData, setGraphData] = useState([]);
-
-  const fetchAllData = async () => {
-    setLoading(true); // Start loading
-    try {
-     
-      const [summaryRes, pieChartRes, graphRes] = await Promise.all([
-        fetch("/api/BillActions/FetchBills/GetBillsSummary", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ user }),
-        }),
-        fetch("/api/Homepage/PieChart", {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        }),
-        fetch("/api/Homepage/Graph", {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        }),
-      ]);
-
-      // Throw an error if any request fails
-      if (!summaryRes.ok) throw new Error("Failed to fetch bills summary");
-      if (!pieChartRes.ok) throw new Error("Failed to fetch pie chart data");
-      if (!graphRes.ok) throw new Error("Failed to fetch graph data");
-
-      const summaryData = await summaryRes.json();
-      const pieChartData = await pieChartRes.json();
-      const graphDataJson = await graphRes.json();
-
-      dispatch(setBillSummary(summaryData.data));
-
-      setPieChartMonthlyData(pieChartData.data.monthly || []);
-      setPieChartYearlyData(pieChartData.data.yearly || []);
-      setGraphData(graphDataJson.data || []);
-
-      console.log("fetched data");
-    } catch (error) {
-      console.error("Error fetching dashboard data:", error);
-      toast.error("Something went wrong while loading your dashboard");
-    } finally {
-      setLoading(false); // End loading
-    }
-  };
-
-  useEffect(() => {
-    fetchAllData();
-  }, [dispatch, user]);
-
+  // Redux selectors
   const totalAmount = useAppSelector(selectTotalAmountSelector);
   const currentMonthAmount = useAppSelector(selectCurrentMonthAmountSelector);
   const maxSpentCategory = useAppSelector(mostSpentCategorySelector);
   const miscellaneousSpent = useAppSelector(MiscellaneousSpentSelector);
-
-  // TODO: Fetch the comparison from the database; currently hardcoded.
-  const comparisonSubtext = "50% more from last month";
 
   return (
     <div className="w-full flex flex-col p-5 gap-5">
@@ -116,7 +124,7 @@ const Homepage: React.FC<AppProps> = ({ user }) => {
           icon={IndianRupee}
           date={`till ${formattedDate}`}
           amount={totalAmount}
-          subtext={comparisonSubtext}
+          subtext={summaryData?.currentMonthAmount.comparison || ""}
           loading={loading}
         />
         <InfoCard

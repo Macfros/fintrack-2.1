@@ -3,9 +3,9 @@
 import dynamic from "next/dynamic";
 import React, { useEffect, useState, useCallback } from 'react';
 import { FiHome, FiUser, FiSettings } from 'react-icons/fi';
-import Sidebar, { SidebarItem } from '../Sidebar/Sidebar';
-const Homepage = dynamic(() => import("@/app/components/HomePage/Homepage"));
-const BillOperations = dynamic(() => import("../Bills/BillOperations"));
+import Sidebar, { SidebarItem } from '../sidebar/Sidebar';
+const Homepage = dynamic(() => import("@/app/components/homePage/Homepage"));
+const BillOperations = dynamic(() => import("../bills/BillOperations"));
 
 interface AppProps {
   user?: {

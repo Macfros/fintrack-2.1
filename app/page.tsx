@@ -1,8 +1,8 @@
 import { getServerSession } from "next-auth/next";
-import NavbarMain from "./components/Navbar/NavbarMain";
-import Dashboard from "./components/Dashboard/Dashboard";
+import NavbarMain from "./components/navbar/NavbarMain";
+import Dashboard from "./components/dashboard/Dashboard";
 import { authOptions } from "@/auth";
-import LoginScreen from "./components/LoginScreen/LoginScreen";
+import LoginScreen from "./components/loginScreen/LoginScreen";
 
 export default async function Home() {
   const session = await getServerSession(authOptions);

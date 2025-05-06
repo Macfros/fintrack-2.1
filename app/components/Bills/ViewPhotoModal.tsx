@@ -1,7 +1,7 @@
 // ViewPhotoModal.tsx
 import React from "react";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button } from "@heroui/react";
-import { BillModel } from "@/app/Models/Models";
+import { BillModel } from "@/app/models/Models";
 
 interface ViewPhotoModalProps {
   isOpen: boolean;

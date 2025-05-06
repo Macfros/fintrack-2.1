@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Button } from "@heroui/react";
-import { BillModel } from "@/app/Models/Models";
+import { BillModel } from "@/app/models/Models";
 import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
 import { deleteBill } from "@/app/store/slices/bill";
 import { Download, Eye, List, Trash } from "lucide-react";
@@ -8,10 +8,15 @@ import toast from "react-hot-toast";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import BillDescriptionViewer from "./BillDescriptionViewer";
 import ViewPhotoModal from "./ViewPhotoModal";
+import {
+  useDeleteBillMutation,
+} from "@/app/store/api/bill.api"
 
 const BillTable: React.FC = () => {
   const billList = useAppSelector((state) => state.bills.billList);
   const dispatch = useAppDispatch();
+  
+  const[deleteBillApi , { isLoading, error, isSuccess }] = useDeleteBillMutation();
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -70,26 +75,19 @@ const BillTable: React.FC = () => {
   const confirmDelete = async () => {
     if (selectedBill) {
       try {
-        const response = await fetch('/api/BillActions/DeleteBill', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ id: selectedBill.id }),  // Send only the bill ID
-        });
-
-        if (!response.ok) {
-          toast.error("Something went wrong!");
+        const result = await deleteBillApi(selectedBill.id); // use mutation
+  
+        if (error) {
+          toast.error("Failed to delete bill!");
           return;
         }
 
-        dispatch(deleteBill(selectedBill));  // Dispatch the deletion action
+        dispatch(deleteBill(selectedBill)); // optional if you're managing local state too
         toast.success("Bill Deleted!");
-
-      } catch (e) {
+      } catch (error) {
         toast.error("Something went wrong!");
       } finally {
-        setIsDeleteModalOpen(false);  // Close the modal after the action
+        setIsDeleteModalOpen(false);
       }
     }
   };
@@ -125,7 +123,7 @@ const BillTable: React.FC = () => {
               <TableCell className="align-middle">
                 <div className="flex gap-2">
                 <Button
-                  onClick={() => handleViewer(item)}
+                  onPress={() => handleViewer(item)}
                   isIconOnly
                   color="success"
                   variant="ghost"
@@ -134,7 +132,7 @@ const BillTable: React.FC = () => {
                   <List />
                 </Button>
                 <Button
-                  onClick={() => handleDeleteClick(item)}
+                  onPress={() => handleDeleteClick(item)}
                   isIconOnly
                   color="danger"
                   variant="ghost"
@@ -143,7 +141,7 @@ const BillTable: React.FC = () => {
                   <Trash />
                 </Button>
                 <Button
-                  onClick={() => handleImageViewer(item)}
+                  onPress={() => handleImageViewer(item)}
                   isIconOnly
                   color="success"
                   variant="ghost"

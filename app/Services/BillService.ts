@@ -179,7 +179,7 @@ export async function getSpendingSummary(userId: string) {
 }
 
 
-export const uploadBillManually = async (formData: FormData, token: any) => {
+export const uploadBillManually = async (formData: FormData, userId: string) => {
     try {
         const name = formData.get('name') as string;
         const rawCategory = formData.get("category") as string;
@@ -188,14 +188,11 @@ export const uploadBillManually = async (formData: FormData, token: any) => {
         const priceInt = parseFloat(price);
         const subItemsArray = JSON.parse(formData.get('subItems') as string);
 
-        if (!token || !token.email) {
-            throw new Error('User not authenticated');
-        }
 
         // Fetch the user from the database using their email
         const user = await prisma.user.findUnique({
             where: {
-                email: token.email,
+                id: userId,
             },
         });
 
@@ -243,7 +240,7 @@ export const uploadBillManually = async (formData: FormData, token: any) => {
 };
 
 
-export const UploadWithAI = async (formData: FormData, token: JWT): Promise<boolean | photo> => {
+export const UploadWithAI = async (formData: FormData, userId: string): Promise<boolean | photo> => {
     
     const mindeeClient = new mindee.Client({ apiKey: process.env.MINDEE_API_KEY });
 
@@ -267,7 +264,7 @@ export const UploadWithAI = async (formData: FormData, token: JWT): Promise<bool
                 name: resp.document.inference.prediction.supplierName.value || " ",
                 category: resp.document.inference.prediction.category.value || "Miscellaneous",
                 amount: resp.document.inference.prediction.totalAmount.value || 0,
-                authorId: token?.id as string,  // Assuming token contains user information
+                authorId: userId,  // Assuming token contains user information
                 secure_url: imageUrl,
                 subitems: {
                     createMany: {

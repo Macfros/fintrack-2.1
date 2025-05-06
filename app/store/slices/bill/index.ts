@@ -1,68 +1,68 @@
-"use client";
+  "use client";
 
-import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { BillModel } from '@/app/Models/Models';
+  import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
+  import { BillModel } from '@/app/models/Models';
 
-interface BillState {
-  billList: BillModel[];
-  summary: BillSummary | null; // Stores summary separately
-}
+  interface BillState {
+    billList: BillModel[];
+    summary: BillSummary | null; // Stores summary separately
+  }
 
-interface BillSummary {
-  totalAmount: number;
-  currentMonthAmount: { amount: number; comparison: string };
-  mostSpentCategory: { category: string; total: number };
-  miscellaneousSpent: { amount: number; comparison: string };
-}
+  interface BillSummary {
+    totalAmount: number;
+    currentMonthAmount: { amount: number; comparison: string };
+    mostSpentCategory: { category: string; total: number };
+    miscellaneousSpent: { amount: number; comparison: string };
+  }
 
-const initialState: BillState = {
-  billList: [],
-  summary: null,
-};
+  const initialState: BillState = {
+    billList: [],
+    summary: null,
+  };
 
-export const billSlice = createSlice({
-  name: 'bills',
-  initialState,
-  reducers: {
-    setBills: (state, action: PayloadAction<BillModel[]>) => {
-      state.billList = action.payload;
+  export const billSlice = createSlice({
+    name: 'bills',
+    initialState,
+    reducers: {
+      setBills: (state, action: PayloadAction<BillModel[]>) => {
+        state.billList = action.payload;
+      },
+      addBill: (state, action: PayloadAction<BillModel>) => {
+        state.billList = [action.payload, ...state.billList];
+      },
+      deleteBill: (state, action: PayloadAction<BillModel>) => {
+        state.billList = state.billList.filter(bill => bill.id !== action.payload.id);
+      },
+      setBillSummary(state, action: PayloadAction<BillSummary>) {
+        state.summary = action.payload;
+      },
     },
-    addBill: (state, action: PayloadAction<BillModel>) => {
-      state.billList = [action.payload, ...state.billList];
-    },
-    deleteBill: (state, action: PayloadAction<BillModel>) => {
-      state.billList = state.billList.filter(bill => bill.id !== action.payload.id);
-    },
-    setBillSummary(state, action: PayloadAction<BillSummary>) {
-      state.summary = action.payload;
-    },
-  },
-});
+  });
 
-export const { setBills, addBill, deleteBill, setBillSummary } = billSlice.actions;
+  export const { setBills, addBill, deleteBill, setBillSummary } = billSlice.actions;
 
-// Fixed version:
-export const selectTotalAmountSelector = (state: { bills: BillState }) => 
-  state.bills.summary?.totalAmount || 0;
+  // Fixed version:
+  export const selectTotalAmountSelector = (state: { bills: BillState }) => 
+    state.bills.summary?.totalAmount || 0;
 
-const defaultCurrentMonthAmount = { amount: 0, comparison: "" };
-const defaultMostSpentCategory = { category: "", total: 0 };
-const defaultMiscellaneousSpent = { amount: 0, comparison: "" };
+  const defaultCurrentMonthAmount = { amount: 0, comparison: "" };
+  const defaultMostSpentCategory = { category: "", total: 0 };
+  const defaultMiscellaneousSpent = { amount: 0, comparison: "" };
 
-export const selectCurrentMonthAmountSelector = createSelector(
-  (state: { bills: BillState }) => state.bills.summary?.currentMonthAmount ?? defaultCurrentMonthAmount,
-  (currentMonthAmount) => ({ ...currentMonthAmount }) // Return a shallow copy
-);
+  export const selectCurrentMonthAmountSelector = createSelector(
+    (state: { bills: BillState }) => state.bills.summary?.currentMonthAmount ?? defaultCurrentMonthAmount,
+    (currentMonthAmount) => ({ ...currentMonthAmount }) // Return a shallow copy
+  );
 
-export const mostSpentCategorySelector = createSelector(
-  (state: { bills: BillState }) => state.bills.summary?.mostSpentCategory ?? defaultMostSpentCategory,
-  (mostSpentCategory) => ({ ...mostSpentCategory }) // Return a shallow copy
-);
+  export const mostSpentCategorySelector = createSelector(
+    (state: { bills: BillState }) => state.bills.summary?.mostSpentCategory ?? defaultMostSpentCategory,
+    (mostSpentCategory) => ({ ...mostSpentCategory }) // Return a shallow copy
+  );
 
-export const MiscellaneousSpentSelector = createSelector(
-  (state: { bills: BillState }) => state.bills.summary?.miscellaneousSpent ?? defaultMiscellaneousSpent,
-  (miscellaneousSpent) => ({ ...miscellaneousSpent }) // Return a shallow copy
-);
+  export const MiscellaneousSpentSelector = createSelector(
+    (state: { bills: BillState }) => state.bills.summary?.miscellaneousSpent ?? defaultMiscellaneousSpent,
+    (miscellaneousSpent) => ({ ...miscellaneousSpent }) // Return a shallow copy
+  );
 
 // Helper function to get current and previous month information
 // const getCurrentAndPreviousMonths = () => {

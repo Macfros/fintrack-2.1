@@ -10,6 +10,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import { BarGraphResponse } from '@/app/models/Models';
 
 ChartJS.register(
   CategoryScale,
@@ -22,7 +23,7 @@ ChartJS.register(
 );
 
 interface LineChartComponentProps {
-  data: number[];
+  data: BarGraphResponse | undefined;
 }
 
 const LineChartComponent: React.FC<LineChartComponentProps> = ({ data }) => {
@@ -32,7 +33,7 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({ data }) => {
   ];
 
   // Add validation for data
-  if (!data || data.length !== 12) {
+  if (!data) {
     return <div>Loading or invalid data...</div>;
   }
 

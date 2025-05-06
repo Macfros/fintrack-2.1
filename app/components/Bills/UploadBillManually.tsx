@@ -1,13 +1,13 @@
 import { Button } from "@heroui/button";
 import { IndianRupee, Trash } from "lucide-react";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Input } from "@heroui/react";
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/react";
 import { useState, ChangeEvent, useCallback } from "react";
-import { BillModel, SubItemModel } from "@/app/Models/Models";
+import { BillModel, SubItemModel } from "@/app/models/Models";
 import toast from "react-hot-toast";
-import { categories } from "@/app/Constants/constants";
+import { categories } from "@/app/constants/constants";
 import { useAppDispatch } from "@/app/store/hooks";
 import { addBill } from "@/app/store/slices/bill";
+import { useAddManualBillMutation } from "@/app/store/api/bill.api";
 
 interface SubItemProps {
   index: number;
@@ -62,6 +62,7 @@ const SubItem: React.FC<SubItemProps> = ({ index, subItem, onDelete, onChange })
 const UploadBillManually: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
   const dispatch = useAppDispatch();
   const [subitems, setSubitems] = useState<SubItemModel[]>([{ id: 0, name: "", amount: 0 }]);
+  const [addManualBill, { isLoading: isUploading }] = useAddManualBillMutation();
   const [bill, setBill] = useState<BillModel>({
     id: "",
     name: "",
@@ -119,29 +120,42 @@ const UploadBillManually: React.FC<{ isOpen: boolean; onClose: () => void }> = (
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+  
+    // build FormData
     const formData = new FormData();
     formData.append("name", bill.name);
     formData.append("category", bill.category);
     formData.append("amount", bill.amount.toString());
-    formData.append("date", new Date().toISOString());
     formData.append("subItems", JSON.stringify(subitems));
-    if (bill.billImage) formData.append("billImage", bill.billImage);
-
-    try {
-      const response = await fetch("/api/BillActions/UploadBillManually", { method: "POST", body: formData });
-      if (!response.ok) throw new Error("Network response was not ok");
-      const { data } = await response.json();
-      const mappedResult = { ...data, subItems: data.subitems || [] };
-      toast.success("Bill Uploaded!");
-      dispatch(addBill(mappedResult));
-    } catch (error) {
-      console.error("Error submitting form:", error);
-      toast.error("Oops! Something went wrong");
+    if (bill.billImage) {
+      formData.append("billImage", bill.billImage);
     }
-
-    setSubitems([{ id: 0, name: "", amount: 0 }]);
-    setBill({ id: "", name: "", category: "", amount: 0, createdAt: "", subItems: [], billImage: undefined });
-    onClose();
+  
+    try {
+      // fire the mutation and unwrap its result
+      const createdBill = await addManualBill(formData).unwrap();
+  
+      // success!
+      toast.success("Bill uploaded successfully");
+      dispatch(addBill(createdBill));    // update your slice
+      onClose();
+    } catch (err: any) {
+      console.error("Error uploading bill:", err);
+      // err.message is your server/client error
+      toast.error(err.message || "Oops! Something went wrong");
+    } finally {
+      // reset form state
+      setSubitems([{ id: 0, name: "", amount: 0 }]);
+      setBill({
+        id: "",
+        name: "",
+        category: "",
+        amount: 0,
+        createdAt: "",
+        subItems: [],
+        billImage: undefined,
+      });
+    }
   };
 
   return (

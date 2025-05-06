@@ -9,7 +9,7 @@ import {
   Button,
   ModalBody,
 } from "@heroui/react";
-import { BillModel, SubItemModel } from "@/app/Models/Models";
+import { BillModel, SubItemModel } from "@/app/models/Models";
 
 interface BillDescriptionViewerProps {
   isOpen: boolean;
